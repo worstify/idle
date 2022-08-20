@@ -1,1 +1,38 @@
-local a={}local b={}function a.new(b,c,d)local e={}e.Closure=b e.Index=c e.Value=d e.Set=a.set e.Update=a.update return e end function a.set(a,b)setUpvalue(a.Closure.Data,a.Index,b)a.Value=b end function a.update(a,b)local c=b or getUpvalue(a.Closure.Data,a.Index)local d=a.Scanned a.Value=c if type(c)~="table"and d then a.Scanned=nil elseif d then for a,b in pairs(c)do if d[a]then d[a]=b end end end end return a,b
+local Upvalue = {}
+local TableUpvalue = {}
+
+function Upvalue.new(closure, index, value)
+    local upvalue = {}
+
+    upvalue.Closure = closure
+    upvalue.Index = index
+    upvalue.Value = value
+    upvalue.Set = Upvalue.set
+    upvalue.Update = Upvalue.update
+
+    return upvalue
+end
+
+function Upvalue.set(upvalue, value)
+    setUpvalue(upvalue.Closure.Data, upvalue.Index, value)
+    upvalue.Value = value
+end
+
+function Upvalue.update(upvalue, newValue)
+    local value = newValue or getUpvalue(upvalue.Closure.Data, upvalue.Index)
+    local scanned = upvalue.Scanned
+
+    upvalue.Value = value
+
+    if type(value) ~= "table" and scanned then
+        upvalue.Scanned = nil
+    elseif scanned then
+        for i,v in pairs(value) do
+            if scanned[i] then
+                scanned[i] = v
+            end
+        end
+    end
+end
+
+return Upvalue, TableUpvalue

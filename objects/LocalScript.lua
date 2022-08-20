@@ -1,1 +1,15 @@
-local a={}function a.new(a)local b={}local c=getScriptClosure(a)b.Instance=a b.Environment=getSenv(a)b.Constants=getConstants(c)b.Protos=getProtos(c)return b end return a
+local LocalScript = {}
+
+function LocalScript.new(instance)
+    local localScript = {}
+    local closure = getScriptClosure(instance)
+
+    localScript.Instance = instance
+    localScript.Environment = getSenv(instance)
+    localScript.Constants = getConstants(closure)
+    localScript.Protos = getProtos(closure)
+
+    return localScript
+end
+
+return LocalScript
