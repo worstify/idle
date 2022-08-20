@@ -1,1 +1,191 @@
-local a=game:GetService("TextService")local b=game:GetService("TweenService")local c={}local d=import("modules/ClosureSpy")if not hasMethods(d.RequiredMethods)then return c end;local e=import("ui/controls/Prompt")local f=import("ui/controls/CheckBox")local g=import("ui/controls/Dropdown")local h,i=import("ui/controls/List")local j,k=import("ui/controls/MessageBox")local l,m=import("ui/controls/ContextMenu")local n=import("rbxassetid://5042109928").Base;local o=import("rbxassetid://5042114982").ClosureSpy;local p=n.Prompts;local q=n.Body.Pages.ClosureSpy;local r=q.List;local s=r.Query;local t=s.Search;local u=s.Refresh;local v=r.Results.Clip.Content;local w=q.Logs;local x=w.Buttons;local y=w.ClosureObject;local z=w.Back;local A=w.Results.Clip.Content;local B=q.Conditions;local C=B.ClosureObject;local D=B.Buttons;local E=B.Results.Clip.Content;local F=B.Back;local G=p.NewClosureCondition;local H=G.Inner;local I=H.Buttons;local J=H.Content;local K=J.Index;local L=d.CurrentClosures;local M={type="rbxassetid://4702850565",status="rbxassetid://4909102841",valueType="rbxassetid://4702850565",block="rbxassetid://4891641806",unblock="rbxassetid://4891642508",ignore="rbxassetid://4842578510",unignore="rbxassetid://4842578818"}local N={fadeLength=TweenInfo.new(0.15),textWidth=Vector2.new(1337420,20),normalColor=Color3.new(1,1,1),blockedColor=Color3.fromRGB(170,0,0),ignoredColor=Color3.fromRGB(100,100,100)}local O=e.new(G)local P=g.new(J.Status)local Q=g.new(J.Type)local R=g.new(J.ValueType)local S=h.new(v,true)local T=h.new(A)local U=h.new(E,true)local V={}local W={}local X={logs={},conditions={}}local Y=m.new("rbxassetid://4891633802","Call Conditions")local Z=m.new("rbxassetid://4892169181","Clear Calls")local _=m.new("rbxassetid://4842578510","Ignore Calls")local a0=m.new("rbxassetid://4891641806","Block Calls")local a1=m.new("rbxassetid://4702831188","Remove Log")local a2=m.new("rbxassetid://4800244808","Get Calling Script")local a3=m.new("rbxassetid://4666593447","Spy Calling Function")local a4=m.new("rbxassetid://4702831188","Remove Condition")local a5=m.new("rbxassetid://4892169181","Clear Calls")local a6=m.new("rbxassetid://4842578510","Ignore Calls")local a7=m.new("rbxassetid://4891641806","Block Calls")local a8=m.new("rbxassetid://4842578818","Unignore Calls")local a9=m.new("rbxassetid://4891642508","Unblock Calls")local aa=m.new("rbxassetid://4702831188","Remove Logs")local ab=m.new("rbxassetid://4702831188","Remove Conditions")local ac=l.new({Y,Z,_,a0,a1})local ad=l.new({a5,a6,a8,a7,a9,aa})local ae=l.new({a2,a3,repeatCallContext})local af=l.new({a4})local ag=l.new({ab})local function ah()local ai=(X.hookLog or X.logContext).Hook;x.Ignore.Label.Text=ai.Ignored and"Unignore"or"Ignore"x.Ignore.Icon.Image=ai.Ignored and M.unignore or M.ignore;local aj=a:GetTextSize(ai.Ignored and"Unignore"or"Ignore",18,"SourceSans",N.textWidth).X+30;x.Ignore.Size=UDim2.new(0,aj,0,20)end;local function ak()local ai=(X.hookLog or X.logContext).Hook;x.Block.Label.Text=ai.Blocked and"Unblock"or"Block"x.Block.Icon.Image=ai.Blocked and M.unblock or M.block;local aj=a:GetTextSize(ai.Blocked and"Unblock"or"Block",18,"SourceSans",N.textWidth).X+30;x.Block.Size=UDim2.new(0,aj,0,20)end;local al={}function al.new(am,an,ao,ap,type)local aq={}local ar=o.ConditionPod:Clone()local as=ar.Content;local at=ar.Identifiers;local au=i.new(ar,U)local av=f.new(as.Toggle)local aw=type or typeof(ap)local ax=oh.Constants.Types;local ay=an=="Ignore"and am.IgnoredArgs[ao]or am.BlockedArgs[ao]aq.Branch=ay;aq.Status=an;aq.Index=ao;aq.Value=ap;aq.Type=type;aq.Closure=am;aq.Enabled=true;aq.Instance=ar;aq.Button=au;aq.Toggle=al.toggle;aq.Remove=al.remove;av:SetCallback(function()aq:Toggle()end)au:SetRightCallback(function()X.condition=aq end)au:SetSelectedCallback(function()if not table.find(X.conditions,aq)then table.insert(X.conditions,aq)end end)if byType then ar.Identifiers.ByType.Visible=false end;at.ByType.Visible=type~=nil;at.Status.Image=an=="Ignore"and M.ignore or M.block;at.Status.Border.Image=at.Status.Image;as.Index.Text=ao;as.Label.Text=type and aw or toString(ap)as.Label.TextColor3=oh.Constants.Syntax[aw]or oh.Constants.Syntax["userdata"]as.Type.Image=ax[aw]or ax["userdata"]return aq end;function al.toggle(aq)aq.Enabled=not aq.Enabled;local ao=aq.Index;local ap=aq.Value;local am=aq.Closure;local az=am.IgnoredArgs[ao]local aA=am.BlockedArgs[ao]local aB=aq.Status=="Ignore"and az or aA;if ap then aB.values[ap]=aq.Enabled or nil else aB.types[aq.Type]=aq.Enabled or nil end end;function al.remove(aq)local ay=aq.Branch;aq.Button:Remove()if aq.Value then ay.values[aq.Value]=nil else ay.types[aq.Type]=nil end end;local function aC(aD)U:Clear()r.Visible=false;w.Visible=false;B.Visible=true;local aE=a:GetTextSize(aD.Closure.Name,18,"SourceSans",N.textWidth).X+20;C.Icon.Image=oh.Constants.Types["function"]C.Label.Text=aD.Closure.Name;C.Label.Size=UDim2.new(0,aE,0,20)C.Position=UDim2.new(1,-aE,0,0)for ao,aF in pairs(aD.IgnoredArgs)do for type in pairs(aF.types)do al.new(aD,"Ignore",ao,nil,type)end;for ap in pairs(aF.values)do al.new(aD,"Ignore",ao,ap)end end;for ao,aF in pairs(aD.BlockedArgs)do for type in pairs(aF.types)do al.new(aD,"Block",ao,nil,type)end;for ap in pairs(aF.values)do al.new(aD,"Block",ao,ap)end end end;S:BindContextMenu(ac)S:BindContextMenuSelected(ad)T:BindContextMenu(ae)U:BindContextMenu(af)U:BindContextMenuSelected(ag)local aG={}local aH={}function aG.new(aD)local aI={}local au=o.ClosureLog:Clone()local aJ=au:FindFirstChild("Name")local aK=au.Information;local aL=i.new(au,S)local am=aD.Closure;local aM=am.Data;local aN=b:Create(aJ,N.fadeLength,{TextColor3=N.normalColor})local aO=b:Create(aJ,N.fadeLength,{TextColor3=N.blockedColor})local aP=b:Create(aJ,N.fadeLength,{TextColor3=N.ignoredColor})aK.Protos.Text=#getProtos(aM)aK.Upvalues.Text=#getUpvalues(aM)aK.Constants.Text=#getConstants(aM)au.Name=am.Name;aJ.Text=am.Name;local function aQ()if X.hookLog then T:Clear()end;local aE=a:GetTextSize(am.Name,18,"SourceSans",N.textWidth).X+20;X.hookLog=aI;for aR,aS in pairs(aD.Logs)do aH.new(aI,aS)end;ak()ah()y.Icon.Image=oh.Constants.Types["function"]y.Label.Text=am.Name;y.Label.Size=UDim2.new(0,aE,0,20)y.Position=UDim2.new(1,-aE,0,0)T:Recalculate()end;aL:SetCallback(function()local aT=getContext()setContext(7)if X.hookLog~=aI then if#aD.Logs>400 then j.Show("Warning","This closure seems to have a lot of calls, opening this may cause your game to freeze for a few seconds.\n\nContinue?",k.YesNo,aQ)else aQ()end end;r.Visible=false;w.Visible=true;X.hookLog=aI;setContext(aT)end)aL:SetRightCallback(function()local aT=getContext()setContext(7)_:SetIcon(aD.Ignored and M.unignore or M.ignore)_:SetText(aD.Ignored and"Unignore Calls"or"Ignore Calls")a0:SetIcon(aD.Blocked and M.unblock or M.block)a0:SetText(aD.Blocked and"Unblock Calls"or"Block Calls")X.logContext=aI;setContext(aT)end)aL:SetSelectedCallback(function()if not table.find(X.logs,aI)then table.insert(X.logs,aI)end end)V[aD]=aI;aI.Hook=aD;aI.Button=aL;aI.BlockAnimation=aO;aI.IgnoreAnimation=aP;aI.NormalAnimation=aN;aI.NormalAnimation=aN;aI.Clear=aG.clear;aI.PlayBlock=aG.playBlock;aI.PlayIgnore=aG.playIgnore;aI.PlayNormal=aG.playNormal;aI.Adjust=aG.adjust;aI.IncrementCalls=aG.incrementCalls;aI.Decrementcalls=aG.decrementCalls;return aI end;local function aU(ar,ao,ap)local aF=o.Arg:Clone()local aw=type(ap)aF.Icon.Image=oh.Constants.Types[aw]aF.Index.Text=ao;aF.Label.Text=toString(ap)aF.Label.TextColor3=oh.Constants.Syntax[aw]aF.Parent=ar.Contents;return aF.AbsoluteSize.Y+5 end;function aH.new(aI,aS)local ar=o.CallPod:Clone()local aV=aS.args;if X.hookLog~=aI then ar.Visible=false end;local au=i.new(ar,T)local aW=0;if#aV==0 then aW=aW+aU(ar,1,nil)else for aX=1,#aV do local aY=aV[aX]aW=aW+aU(ar,aX,aY)end end;au:SetRightCallback(function()X.args=aS.args;X.callingScript=aS.script end)au.Instance.Size=au.Instance.Size+UDim2.new(0,0,0,aW)return au end;function aG.playIgnore(aI)aI.IgnoreAnimation:Play()end;function aG.playBlock(aI)aI.BlockAnimation:Play()end;function aG.playNormal(aI)aI.NormalAnimation:Play()end;function aG.adjust(aI)local aZ=aI.Button.Instance;local a_=aZ.Icon;local b0=aZ:FindFirstChild("Name")local b1=a:GetTextSize(aZ.Calls.Text,18,"SourceSans",N.textWidth).X+10;local b2=b1+21;aZ.Calls.Size=UDim2.new(0,b1,0,20)a_.Position=UDim2.new(0,b1,0.5,-7)b0.Position=UDim2.new(0,b2,0,0)b0.Size=UDim2.new(1,-b2,1,0)end;function aG.clear(aI)local aZ=aI.Button.Instance;aI.Hook:Clear()if X.hookLog==aI then T:Clear()end;aZ.Calls.Text=0;aI:Adjust()end;function aG.incrementCalls(aI,aS)local aZ=aI.Button.Instance;local aD=aI.Hook;aD.Calls=aD.Calls+1;local b3=aD.Calls;aZ.Calls.Text=b3<10000 and b3 or"..."aI:Adjust()if X.hookLog==aI then aH.new(aI,aS)T:Recalculate()end end;function aG.decrementCalls(aI,aV)local b4=aI.Button.Instance;local aD=aI.Hook;aD.Calls=Hook.calls-1;local b3=aD.Calls;b4.Calls.Text=b3<10000 and b3 or"..."aI:Adjust()end;function aG.remove(aI)local aD=aI.Hook;aI.Button:Remove()V[aD]=nil;W[aD]=true end;t.FocusLost:Connect(function(b5)if b5 then for aD,aI in pairs(V)do local ar=aI.Button.Instance;ar.Visible=not(ar.Visible and not aD.Closure.Name:lower():find(t.Text))end;S:Recalculate()Search.Text=""end end)u.MouseButton1Click:Connect(function()S:Recalculate()end)z.MouseButton1Click:Connect(function()w.Visible=false;r.Visible=true end)x.Ignore.MouseButton1Click:Connect(function()local b6=X.hookLog;local aD=b6.Hook;aD:Ignore()ah()if aD.Blocked then b6:PlayBlock()elseif aD.Ignored then b6:PlayIgnore()else b6:PlayNormal()end end)x.Block.MouseButton1Click:Connect(function()local b6=X.hookLog;local aD=b6.Hook;aD:Block()ak()if aD.Blocked then b6:PlayBlock()elseif aD.Ignored then b6:PlayIgnore()else b6:PlayNormal()end end)x.Clear.MouseButton1Click:Connect(function()X.hookLog:Clear()end)x.Conditions.MouseButton1Click:Connect(function()X.conditionLog=X.logContext or X.hookLog;aC(X.conditionLog.Hook)end)F.MouseButton1Click:Connect(function()B.Visible=false;if X.hookLog then w.Visible=true else r.Visible=true end end)D.New.MouseButton1Click:Connect(function()O:Show()end)I.Add.MouseButton1Click:Connect(function()if not P.Selected then return j.Show("Error","Invalid condition status",k.OK)end;local an=P.Selected.Name;local type=Q.Selected.Name;local aw=R.Selected.Name;local ap=J.Value.Input.Text;if an~="Ignore"and an~="Block"then j.Show("Error","Invalid condition status",k.OK)elseif not oh.Constants.Types[type]and not isUserdata(type)then j.Show("Error","Invalid condition type",k.OK)elseif aw~="Value"and aw~="Type"then j.Show("Error","Invalid condition value association",k.OK)elseif aw=="Value"then if type=="string"then ap=toString(ap)elseif type=="number"then ap=tonumber(ap)if not ap then return j.Show("Error","Your input does not match the type you selected",k.OK)end elseif type=="boolean"then if ap=="true"then ap=true elseif ap=="false"then ap=false else return j.Show("Error","Your input does not match the type you selected",k.OK)end else local b7,b8=pcall(loadstring("return "..ap))if aw=="Value"then if not b7 then return j.Show("Error","There was an error interpreting your input value",k.OK)elseif typeof(b8)~=type then return j.Show("Error","Your input does not match the type you selected",k.OK)else ap=b8 end end end else ap=type end;local ai=X.conditionLog.Hook;local b9=tonumber(K.Value.Input.Text)local byType=aw=="Type"if an=="Block"then ai:BlockArg(b9,ap,byType)else ai:IgnoreArg(b9,ap,byType)end;if byType then al.new(ai,an,b9,nil,ap)else al.new(ai,an,b9,ap)end;O:Hide()end)I.Cancel.MouseButton1Click:Connect(function()O:Hide()end)K.Add.MouseButton1Click:Connect(function()local ba=tonumber(K.Value.Input.Text)+1;K.Value.Input.Text=ba end)K.Sub.MouseButton1Click:Connect(function()local ba=tonumber(K.Value.Input.Text)-1;K.Value.Input.Text=ba<=0 and 1 or ba end)K.Value.Input.FocusLost:Connect(function()local ba=tonumber(K.Value.Input.Text)if not ba or ba<=0 then K.Value.Input.Text=1 end end)Y:SetCallback(function()X.conditionLog=X.logContext or X.hookLog;aC(X.conditionLog.Hook)end)Z:SetCallback(function()X.logContext:Clear()end)_:SetCallback(function()local b6=X.logContext;local aD=b6.Hook;aD:Ignore()ah()if aD.Blocked then b6:PlayBlock()elseif aD.Ignored then b6:PlayIgnore()else b6:PlayNormal()end end)a0:SetCallback(function()local b6=X.logContext;local aD=b6.Hook;aD:Block()ak()if aD.Blocked then b6:PlayBlock()elseif aD.Ignored then b6:PlayIgnore()else b6:PlayNormal()end end)a1:SetCallback(function()X.logContext:Remove()end)a6:SetCallback(function()for aR,aI in pairs(X.logs)do local aD=aI.Hook;if not aD.Ignored then aD:Ignore()end;if aI.Blocked then aI:PlayBlock()elseif aD.Ignored then aI:PlayIgnore()end end;X.logs={}end)a8:SetCallback(function()for aR,aI in pairs(X.logs)do local aD=aI.Hook;if aD.Ignored then aD:Ignore()end;if aD.Blocked then aI:PlayBlock()else aI:PlayNormal()end end;X.logs={}end)a7:SetCallback(function()for aR,aI in pairs(X.logs)do local aD=aI.Hook;if not aD.Blocked then aD:Block()end;if aD.Blocked then aI:PlayBlock()elseif aD.Ignored then aI:PlayIgnore()end end;X.logs={}end)a9:SetCallback(function()for aR,aI in pairs(X.logs)do local aD=aI.Hook;if aD.Blocked then aD:Block()end;if aD.Ignored then aI:PlayIgnore()else aI:PlayNormal()end end;X.logs={}end)a5:SetCallback(function()for aR,aI in pairs(X.logs)do aI:Clear()end;X.logs={}end)aa:SetCallback(function()for aR,aI in pairs(X.logs)do aI:Remove()end;S:Recalculate()X.logs={}end)a2:SetCallback(function()local bb=oh.getStatus()oh.setStatus("Copying "..X.callingScript.Name.."'s path")setClipboard(getInstancePath(X.callingScript))wait(0.25)oh.setStatus(bb)end)a4:SetCallback(function()X.condition:Remove()X.condition=nil end)ab:SetCallback(function()for aR,aq in pairs(X.conditions)do aq:Remove()end;X.conditions={}end)P:SetCallback(function(bc,X)local bd=X.Name=="Ignore"and M.ignore or M.block;local be=J.Status.Icon;be.Image=bd;be.Border.Image=bd end)Q:SetCallback(function(bc,X)local be=J.Type.Icon;local ax=oh.Constants.Types;local bd=ax[X.Name]or ax["userdata"]be.Image=bd;be.Border.Image=bd end)R:SetCallback(function(bc,X)local bd=X.Name=="Type"and M.type or oh.Constants.Types["integral"]local be=J.ValueType.Icon;be.Image=bd;be.Border.Image=bd end)d.SetEvent(function(aD,aS)local aT=getContext()setContext(7)if not W[aD]then local aI=V[aD]or aG.new(aD)aI:IncrementCalls(aS)end;setContext(aT)end)return c
+local ClosureSpy = {}
+
+local requiredMethods = {
+    ["hookFunction"] = true,
+    ["newCClosure"] = true,
+    ["isLClosure"] = true,
+    ["getProtos"] = true,
+    ["getUpvalues"] = true,
+    ["getUpvalue"] = true,
+    ["getContext"] = true,
+    ["setContext"] = true,
+    ["setUpvalue"] = true,
+    ["getConstants"] = true,
+    ["getConstant"] = true,
+    ["setConstant"] = true
+}
+
+local eventCallback
+
+-- Define as global function in order to reduce upvalue count in hooks
+function log(hook, callingScript, ...)
+    local vargs = {...}
+    
+    if eventCallback and not hook:AreArgsIgnored(vargs) then
+        local call = {
+            script = callingScript,
+            args = vargs
+        }
+        eventCallback(hook, call)
+    end
+end
+
+local function setEvent(callback)
+    if not eventCallback then
+        eventCallback = callback
+    end
+end
+
+local Hook = {}
+local hookMap = {}
+hookCache = {}
+
+function Hook.new(closure)
+    local hook = {}
+    local data = closure.Data
+
+    if getInfo(data).nups < 1 then
+        return
+    elseif hookCache[data] then
+        return false
+    end
+
+    local wrap = { hook, data }
+    hookCache[data] = hookFunction(data, function(...)
+        local vargs = {...}
+        local uHook = wrap[1]
+        local uData = wrap[2]
+
+        if not uHook.Ignored and not uHook:AreArgsIgnored(vargs) then
+            log(uHook, getCallingScript(), ...)
+        end
+
+        if not uHook.Blocked and not uHook:AreArgsBlocked(vargs) then
+            return hookCache[uData](...)
+        end
+    end)
+
+    closure.Data = hookCache[data]
+
+    hook.Closure = closure
+    hook.Calls = 0
+    hook.Logs = {}
+    hook.Ignored = false
+    hook.Blocked = false
+    hook.Ignore = Hook.ignore
+    hook.Block = Hook.block
+    hook.IgnoreArg = Hook.ignoreArg
+    hook.BlockArg = Hook.blockArg
+    hook.Remove = Hook.remove
+    hook.Clear = Hook.clear
+    hook.BlockedArgs = {}
+    hook.IgnoredArgs = {}
+    hook.AreArgsBlocked = Hook.areArgsBlocked
+    hook.AreArgsIgnored = Hook.areArgsIgnored
+    hook.IncrementCalls = Hook.incrementCalls
+    hook.DecrementCalls = Hook.decrementCalls
+
+    hookMap[data] = hook
+
+    return hook
+end
+
+function Hook.remove(hook)
+    hookMap[hook.Closure.Data] = nil
+end
+
+function Hook.clear(hook)
+    hook.Calls = 0
+end
+
+function Hook.block(hook)
+    hook.Blocked = not hook.Blocked
+end
+
+function Hook.ignore(hook)  
+    hook.Ignored = not hook.Ignored
+end
+
+function Hook.blockArg(hook, index, value, byType)
+    local blockedArgs = hook.BlockedArgs
+    local blockedIndex = blockedArgs[index]
+
+    if not blockedIndex then
+        blockedIndex = {
+            types = {},
+            values = {}
+        }
+        blockedArgs[index] = blockedIndex
+    end
+
+    if byType then
+        blockedIndex.types[value] = true
+    else
+        blockedIndex.values[value] = true
+    end
+end
+
+function Hook.ignoreArg(hook, index, value, byType)
+    local ignoredArgs = hook.IgnoredArgs
+    local indexIgnore = ignoredArgs[index]
+
+    if not indexIgnore then
+        indexIgnore = {
+            types = {},
+            values = {}
+        }
+
+        ignoredArgs[index] = indexIgnore
+    end
+
+    if byType then
+        indexIgnore.types[value] = true
+    else
+        indexIgnore.values[value] = true
+    end
+end
+
+function Hook.areArgsBlocked(hook, args)
+    local blockedArgs = hook.BlockedArgs
+
+    for index, value in pairs(args) do
+        local indexBlock = blockedArgs[index]
+        
+        if indexBlock and ( indexBlock.types[typeof(value)] or indexBlock.values[value] ~= nil ) then
+            return true
+        end
+    end
+
+    return false
+end
+
+function Hook.areArgsIgnored(hook, args)
+    local ignoredArgs = hook.IgnoredArgs
+
+    for index, value in pairs(args) do
+        local indexIgnore = ignoredArgs[index]
+
+        if indexIgnore and ( indexIgnore.types[typeof(value)] or indexIgnore.values[value] ~= nil ) then
+            return true
+        end
+    end
+
+    return false
+end
+
+function Hook.incrementCalls(hook, vargs)
+    hook.Calls = hook.Calls + 1
+    table.insert(hook.Logs, vargs)
+end
+
+function Hook.decrementCalls(hook, vargs)
+    local logs = hook.Logs
+
+    hook.Calls = hook.Calls - 1
+    table.remove(logs, table.find(logs, vargs))
+end
+
+ClosureSpy.Hook = Hook
+ClosureSpy.SetEvent = setEvent
+ClosureSpy.RequiredMethods = requiredMethods
+return ClosureSpy
