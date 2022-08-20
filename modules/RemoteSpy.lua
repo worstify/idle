@@ -1,1 +1,152 @@
-local a={}local b=import("objects/Remote")local c={["checkCaller"]=true,["newCClosure"]=true,["hookFunction"]=true,["isReadOnly"]=true,["setReadOnly"]=true,["getInfo"]=true,["getMetatable"]=true,["setClipboard"]=true,["getNamecallMethod"]=true,["getCallingScript"]=true}local d={FireServer=true,InvokeServer=true,Fire=true,Invoke=true}local e={RemoteEvent=true,RemoteFunction=false,BindableEvent=false,BindableFunction=false}local f={RemoteEvent=Instance.new("RemoteEvent").FireServer,RemoteFunction=Instance.new("RemoteFunction").InvokeServer,BindableEvent=Instance.new("BindableEvent").Fire,BindableFunction=Instance.new("BindableFunction").Invoke}local g={}local h=Instance.new("BindableEvent")local i=false;local function j(k)h.Event:Connect(k)if not i then i=true end end;local l;l=hookMetaMethod(game,"__namecall",function(...)local m=...if typeof(m)~="Instance"then return l(...)end;if e[m.ClassName]and m~=h and d[getNamecallMethod()]then local n=g[m]local o={select(2,...)}if not n then n=b.new(m)g[m]=n end;local p=n.Ignored;local q=n.Blocked;local r=n.AreArgsIgnored(n,o)local s=n.AreArgsBlocked(n,o)if i and(not p and not r)then local t={script=getCallingScript(PROTOSMASHER_LOADED~=nil and 2 or nil),args=o,func=getInfo(3).func}n.IncrementCalls(n,t)h.Fire(h,m,t)end;if q or s then return end end;return l(...)end)local pcall=pcall;local function u(m)if m.ClassName then end end;for v,w in pairs(f)do local x;x=hookFunction(w,newCClosure(function(...)local m=...if typeof(m)~="Instance"then return x(...)end;do local y=pcall(u,m)if not y then return x(...)end end;if e[m.ClassName]and m~=h then local n=g[m]local o={select(2,...)}if not n then n=b.new(m)g[m]=n end;local p=n.Ignored;local r=n:AreArgsIgnored(o)if i and(not p and not r)then local t={script=getCallingScript(PROTOSMASHER_LOADED~=nil and 2 or nil),args=o,func=getInfo(3).func}n:IncrementCalls(t)h:Fire(m,t)end;if n.Blocked or n:AreArgsBlocked(o)then return end end;return x(...)end))oh.Hooks[x]=w end;a.RemotesViewing=e;a.CurrentRemotes=g;a.ConnectEvent=j;a.RequiredMethods=c;return a
+local RemoteSpy = {}
+local Remote = import("objects/Remote")
+
+local requiredMethods = {
+    ["checkCaller"] = true,
+    ["newCClosure"] = true,
+    ["hookFunction"] = true,
+    ["isReadOnly"] = true,
+    ["setReadOnly"] = true,
+    ["getInfo"] = true,
+    ["getMetatable"] = true,
+    ["setClipboard"] = true,
+    ["getNamecallMethod"] = true,
+    ["getCallingScript"] = true,
+}
+
+local remoteMethods = {
+    FireServer = true,
+    InvokeServer = true,
+    Fire = true,
+    Invoke = true
+}
+
+local remotesViewing = {
+    RemoteEvent = true,
+    RemoteFunction = false,
+    BindableEvent = false,
+    BindableFunction = false
+}
+
+local methodHooks = {
+    RemoteEvent = Instance.new("RemoteEvent").FireServer,
+    RemoteFunction = Instance.new("RemoteFunction").InvokeServer,
+    BindableEvent = Instance.new("BindableEvent").Fire,
+    BindableFunction = Instance.new("BindableFunction").Invoke
+}
+
+local currentRemotes = {}
+
+local remoteDataEvent = Instance.new("BindableEvent")
+local eventSet = false
+
+local function connectEvent(callback)
+    remoteDataEvent.Event:Connect(callback)
+
+    if not eventSet then
+        eventSet = true
+    end
+end
+
+local nmcTrampoline
+nmcTrampoline = hookMetaMethod(game, "__namecall", function(...)
+    local instance = ...
+    
+    if typeof(instance) ~= "Instance" then
+        return nmcTrampoline(...)
+    end
+        
+    if remotesViewing[instance.ClassName] and instance ~= remoteDataEvent and remoteMethods[getNamecallMethod()] then
+        local remote = currentRemotes[instance]
+        local vargs = {select(2, ...)}
+            
+        if not remote then
+            remote = Remote.new(instance)
+            currentRemotes[instance] = remote
+        end
+
+        local remoteIgnored = remote.Ignored
+        local remoteBlocked = remote.Blocked
+        local argsIgnored = remote.AreArgsIgnored(remote, vargs)
+        local argsBlocked = remote.AreArgsBlocked(remote, vargs)
+
+        if eventSet and (not remoteIgnored and not argsIgnored) then
+            local call = {
+                script = getCallingScript((PROTOSMASHER_LOADED ~= nil and 2) or nil),
+                args = vargs,
+                func = getInfo(3).func
+            }
+
+            remote.IncrementCalls(remote, call)
+            remoteDataEvent.Fire(remoteDataEvent, instance, call)
+        end
+
+        if remoteBlocked or argsBlocked then
+            return
+        end
+    end
+
+    return nmcTrampoline(...)
+end)
+
+-- vuln fix
+
+local pcall = pcall
+
+local function checkPermission(instance)
+    if (instance.ClassName) then end
+end
+
+for _name, hook in pairs(methodHooks) do
+    local originalMethod
+    originalMethod = hookFunction(hook, newCClosure(function(...)
+        local instance = ...
+
+        if typeof(instance) ~= "Instance" then
+            return originalMethod(...)
+        end
+                
+        do
+            local success = pcall(checkPermission, instance)
+            if (not success) then return originalMethod(...) end
+        end
+
+        if remotesViewing[instance.ClassName] and instance ~= remoteDataEvent then
+            local remote = currentRemotes[instance]
+            local vargs = {select(2, ...)}
+
+            if not remote then
+                remote = Remote.new(instance)
+                currentRemotes[instance] = remote
+            end
+
+            local remoteIgnored = remote.Ignored 
+            local argsIgnored = remote:AreArgsIgnored(vargs)
+            
+            if eventSet and (not remoteIgnored and not argsIgnored) then
+                local call = {
+                    script = getCallingScript((PROTOSMASHER_LOADED ~= nil and 2) or nil),
+                    args = vargs,
+                    func = getInfo(3).func
+                }
+    
+                remote:IncrementCalls(call)
+                remoteDataEvent:Fire(instance, call)
+            end
+
+            if remote.Blocked or remote:AreArgsBlocked(vargs) then
+                return
+            end
+        end
+        
+        return originalMethod(...)
+    end))
+
+    oh.Hooks[originalMethod] = hook
+end
+
+RemoteSpy.RemotesViewing = remotesViewing
+RemoteSpy.CurrentRemotes = currentRemotes
+RemoteSpy.ConnectEvent = connectEvent
+RemoteSpy.RequiredMethods = requiredMethods
+return RemoteSpy
