@@ -1,0 +1,1 @@
+local a={}function a.new(b,c,d)local e={}e.Closure=b e.Index=c e.Value=d e.Set=a.set e.Update=a.update return e end function a.set(a,b)setConstant(a.Closure,a.Index,b)a.Value=b end function a.update(a)a.Value=getConstant(a.Closure,a.Index)end return a

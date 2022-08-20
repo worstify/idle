@@ -1,0 +1,1 @@
+local a={}local b={}function a.new(a)if b[a]then return b[a]end local c={}local d=(getInfo(a)).name or""c.Name=d~=""and d or"Unnamed function"c.Data=a c.Environment=getfenv(a)c.Upvalues={}c.Constants={}c.TemporaryUpvalues={}c.TemporaryConstants={}return c end return a
