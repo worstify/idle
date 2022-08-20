@@ -1,0 +1,1 @@
+local a=game:GetService("Players").LocalPlayer;local b=a.PlayerScripts:FindFirstChild("Control Script")local c={}local function d(e,...)local f=getfenv(1)local g=getrenv()local h;setfenv(1,setmetatable({script=script},{__index=g}))h=syn and{syn.secure_call(e,b,...)}or{e(...)}setfenv(1,f)return unpack(h)end;c.secureCall=d;return c
