@@ -1,0 +1,1 @@
+local a={}local b=import("objects/ModuleScript")local c={["getMenv"]=true,["getProtos"]=true,["getConstants"]=true,["getScriptClosure"]=true,["getLoadedModules"]=true}local function d(e)local f={}e=e or""for g,h in pairs(getLoadedModules())do if h.Name:lower():find(e)then f[h]=b.new(h)end end;return f end;a.Scan=d;a.RequiredMethods=c;return a
