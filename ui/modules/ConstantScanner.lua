@@ -1,1 +1,208 @@
-local a=game:GetService("TextService")local b={}local c=import("modules/ClosureSpy")local d=import("modules/ConstantScanner")if not hasMethods(d.RequiredMethods)then return b end local e=import("objects/Constant")local f,g=import("ui/controls/List")local h,i=import("ui/controls/MessageBox")local j,k=import("ui/controls/ContextMenu")local l=import("ui/controls/TabSelector")local m=(import("rbxassetid://5042109928")).Base.Body.Pages.ConstantScanner local n=(import("rbxassetid://5042114982")).ConstantScanner local o=m.Query local p=o.Search local q=o.Query local r=f.new(m.Results.Clip.Content)local s={}local t local u=k.new("rbxassetid://4666593447","Spy Closure")local v=k.new("rbxassetid://5179169654","View All Constants")local w=k.new("rbxassetid://4891705738","Get Script Path")local x={tempConstantColor=Color3.fromRGB(40,20,20);tempBorderColor=Color3.fromRGB(20,0,0)}r:BindContextMenu(j.new({u;v,w}))local function y(a,b)local c=n.Constant:Clone()local d=a.Index local e=a.Value local f=type(e)local g=toString(e)if b then c.ImageColor3=x.tempConstantColor c.Border.ImageColor3=x.tempBorderColor end if f=="function"then local a=(getInfo(e)).name or""c.Value.Text=a==""and"Unnamed function"or a else c.Value.Text=toString(e)end c.Name=d c.Index.Text=d c.Value.TextColor3=oh.Constants.Syntax[f]c.Icon.Image=oh.Constants.Types[f]return c end local z={}function z.new(a)local b={}local c=n.ClosureLog:Clone()local d=g.new(c,r)local e=a.Constants local f=30 for a,b in pairs(e)do local d=y(b)d.Parent=c.Constants f=(f+d.AbsoluteSize.Y)+5 end if a.Name=="Unnamed function"then(c:FindFirstChild("Name")).TextColor3=Color3.fromRGB(127,127,127)end;(c:FindFirstChild("Name")).Text=a.Name c.Size=UDim2.new(1,0,0,f)d:SetRightCallback(function()t=b end)s[a.Data]=b b.Closure=a b.Constants=e b.Button=d return b end local function A()local a=q.Text if a:gsub(" ","")~=""then if not tonumber(a)and a:len()<=1 then return end r:Clear()s={}for a,b in pairs(d.Scan(a))do z.new(b)end r:Recalculate()else h.Show("Invalid query","Your query is too short",i.OK)end q.Text=""end local B=c.Hook u:SetCallback(function()local a=t.Closure if l.SelectTab("ClosureSpy")then local b=B.new(a)if b==false then h.Show("Already hooked","You are already spying "..a.Name)elseif b==nil then h.Show("Cannot hook",("Cannot hook \"%s\" because there are no upvalues"):format(a.Name))end end end)v:SetCallback(function()if t then local a=t.TemporaryConstants local b=t.Button.Instance local c=0 if a then for a,b in pairs(a)do c=c-(b.AbsoluteSize.Y+5)b:Destroy()end t.TemporaryConstants=nil t.Closure.TemporaryConstants={}else local d=t.Closure a={}for f,g in pairs(getConstants(d.Data))do if not d.Constants[f]then local h=e.new(d,f,g)local i=y(h,true)i.Parent=b.Constants c=(c+i.AbsoluteSize.Y)+5 a[f]=i d.TemporaryConstants[f]=h end end t.TemporaryConstants=a end c=UDim2.new(0,0,0,c)b.Constants.Size=b.Constants.Size+c b.Size=b.Size+c r:Recalculate()end end)w:SetCallback(function()if t then local a=(getfenv(t.Closure.Data)).script if typeof(a)=="Instance"then setClipboard(getInstancePath(a))end end end)p.MouseButton1Click:Connect(A)q.FocusLost:Connect(function(a)if a then A()end end)return b
+local TextService = game:GetService("TextService")
+
+local ConstantScanner = {}
+local ClosureSpy = import("modules/ClosureSpy")
+local Methods = import("modules/ConstantScanner")
+
+if not hasMethods(Methods.RequiredMethods) then
+    return ConstantScanner
+end
+
+local Constant = import("objects/Constant")
+
+local List, ListButton = import("ui/controls/List")
+local MessageBox, MessageType = import("ui/controls/MessageBox")
+local ContextMenu, ContextMenuButton = import("ui/controls/ContextMenu")
+local TabSelector = import("ui/controls/TabSelector")
+
+local Page = import("rbxassetid://5042109928").Base.Body.Pages.ConstantScanner
+local Assets = import("rbxassetid://5042114982").ConstantScanner
+
+local Query = Page.Query
+local Search = Query.Search
+local SearchBox = Query.Query
+ 
+local constantList = List.new(Page.Results.Clip.Content)
+local constantLogs = {}
+local selectedLog 
+
+local spyClosureContext = ContextMenuButton.new("rbxassetid://4666593447", "Spy Closure")
+local viewConstantsContext = ContextMenuButton.new("rbxassetid://5179169654", "View All Constants")
+local getScriptContext = ContextMenuButton.new("rbxassetid://4891705738", "Get Script Path")
+
+local constants = {
+    tempConstantColor = Color3.fromRGB(40, 20, 20),
+    tempBorderColor = Color3.fromRGB(20, 0, 0)
+}
+
+constantList:BindContextMenu(ContextMenu.new({ spyClosureContext, viewConstantsContext, getScriptContext }))
+
+local function addConstant(constant, temporary)
+    local constantLog = Assets.Constant:Clone()
+    local index = constant.Index
+    local value = constant.Value
+    local valueType = type(value)
+    local valueText = toString(value)
+
+    if temporary then
+        constantLog.ImageColor3 = constants.tempConstantColor
+        constantLog.Border.ImageColor3 = constants.tempBorderColor
+    end
+
+    if valueType == "function" then
+        local closureName = getInfo(value).name or ''
+        constantLog.Value.Text = (closureName == '' and "Unnamed function") or closureName
+    else
+        constantLog.Value.Text = toString(value)
+    end
+
+    constantLog.Name = index
+    constantLog.Index.Text = index
+    constantLog.Value.TextColor3 = oh.Constants.Syntax[valueType]
+    constantLog.Icon.Image = oh.Constants.Types[valueType]
+
+    -- constantLog.MouseButton1Click:Connect(function()
+    --     selectedConstant = constant
+    --     selectedConstantLog = constantLog
+    -- end)
+
+    return constantLog
+end
+
+-- Log Object
+local Log = {}
+
+function Log.new(closure)
+    local log = {}
+    local button = Assets.ClosureLog:Clone()
+    local listButton = ListButton.new(button, constantList) 
+    local constants = closure.Constants
+    local logHeight = 30
+
+    for _i, constant in pairs(constants) do
+        local constantLog = addConstant(constant)
+        constantLog.Parent = button.Constants
+
+        logHeight = logHeight + constantLog.AbsoluteSize.Y + 5
+    end
+
+    if closure.Name == "Unnamed function" then
+        button:FindFirstChild("Name").TextColor3 = Color3.fromRGB(127, 127, 127)
+    end
+
+    button:FindFirstChild("Name").Text = closure.Name
+    button.Size = UDim2.new(1, 0, 0, logHeight)
+
+    listButton:SetRightCallback(function()
+        selectedLog = log
+    end)
+
+    constantLogs[closure.Data] = log
+
+    log.Closure = closure
+    log.Constants = constants
+    log.Button = listButton
+    return log
+end
+
+-- UI Functinoality
+local function addConstants()
+    local query = SearchBox.Text
+
+    if query:gsub(' ', '') ~= '' then
+        if not tonumber(query) and query:len() <= 1 then
+            return
+        end
+
+        constantList:Clear()
+        constantLogs = {}
+
+        for _i, closure in pairs(Methods.Scan(query)) do
+            Log.new(closure)
+        end
+
+        constantList:Recalculate()
+    else
+        MessageBox.Show("Invalid query", "Your query is too short", MessageType.OK)
+    end
+
+    SearchBox.Text = ''
+end
+
+local SpyHook = ClosureSpy.Hook
+spyClosureContext:SetCallback(function()
+    local selectedClosure = selectedLog.Closure
+
+    if TabSelector.SelectTab("ClosureSpy") then
+        local result = SpyHook.new(selectedClosure)
+
+        if result == false then
+            MessageBox.Show("Already hooked", "You are already spying " .. selectedClosure.Name)
+        elseif result == nil then
+            MessageBox.Show("Cannot hook", ('Cannot hook "%s" because there are no upvalues'):format(selectedClosure.Name))
+        end
+    end
+end)
+
+viewConstantsContext:SetCallback(function()
+    if selectedLog then
+        local temporaryConstants = selectedLog.TemporaryConstants 
+        local instance = selectedLog.Button.Instance
+        local newHeight = 0
+
+        if temporaryConstants then
+            for _i, constantLog in pairs(temporaryConstants) do
+                newHeight = newHeight - (constantLog.AbsoluteSize.Y + 5)
+                constantLog:Destroy()
+            end
+
+            selectedLog.TemporaryConstants = nil
+            selectedLog.Closure.TemporaryConstants = {}
+        else
+            local closure = selectedLog.Closure
+
+            temporaryConstants = {}
+
+            for i,v in pairs(getConstants(closure.Data)) do
+                if not closure.Constants[i] then
+                    local constant = Constant.new(closure, i, v) 
+
+                    local constantLog = addConstant(constant, true)
+                    constantLog.Parent = instance.Constants
+                    
+                    newHeight = newHeight + constantLog.AbsoluteSize.Y + 5
+                    temporaryConstants[i] = constantLog
+                    closure.TemporaryConstants[i] = constant
+                end
+            end
+
+            selectedLog.TemporaryConstants = temporaryConstants
+        end
+
+        newHeight = UDim2.new(0, 0, 0, newHeight)
+
+        instance.Constants.Size = instance.Constants.Size + newHeight
+        instance.Size = instance.Size + newHeight
+
+        constantList:Recalculate()
+    end
+end)
+
+getScriptContext:SetCallback(function()
+    if selectedLog then
+        local script = getfenv(selectedLog.Closure.Data).script
+            
+        if typeof(script) == "Instance" then
+            setClipboard(getInstancePath(script))
+        end
+    end
+end)
+
+Search.MouseButton1Click:Connect(addConstants)
+SearchBox.FocusLost:Connect(function(returned)
+    if returned then
+        addConstants()
+    end
+end)
+
+return ConstantScanner
