@@ -1,1 +1,86 @@
-local a={}local b=import("modules/ModuleScanner")if not hasMethods(b.RequiredMethods)then return a end local c,d=import("ui/controls/List")local e,f=import("ui/controls/MessageBox")local g,h=import("ui/controls/ContextMenu")local i=(import("rbxassetid://5042109928")).Base.Body.Pages.ModuleScanner local j=(import("rbxassetid://5042114982")).ModuleScanner local k=i.Query local l=k.Search local m=k.Refresh local n=i.Results.Clip.Content local o=c.new(n)local p={}local q local r=h.new("rbxassetid://4891705738","Get Module Path")o:BindContextMenu(g.new({r}))r:SetCallback(function()local a=q.ModuleScript.Instance setClipboard(getInstancePath(a))e.Show("Success",("%s\'s path was copied to your clipboard."):format(a.Name),f.OK)end)local s={}function s.new(a)local b={}local c=a.Instance local e=j.ModuleLog:Clone()local f=d.new(e,o)e.Name=c.Name;(e:FindFirstChild("Name")).Text=c.Name e.Protos.Text=#a.Protos e.Constants.Text=#a.Constants f:SetRightCallback(function()q=b end)p[c]=b b.ModuleScript=a b.Button=f return b end local function t(a)o:Clear()p={}for a,b in pairs(b.Scan(a))do s.new(b)end o:Recalculate()end l.FocusLost:Connect(function(a)if a then t(l.Text)l.Text=""end end)m.MouseButton1Click:Connect(function()t()end)t()return a
+local ModuleScanner = {}
+local Methods = import("modules/ModuleScanner")
+
+if not hasMethods(Methods.RequiredMethods) then
+    return ModuleScanner
+end
+
+local List, ListButton = import("ui/controls/List")
+local MessageBox, MessageType = import("ui/controls/MessageBox")
+local ContextMenu, ContextMenuButton = import("ui/controls/ContextMenu")
+
+local Page = import("rbxassetid://5042109928").Base.Body.Pages.ModuleScanner
+local Assets = import("rbxassetid://5042114982").ModuleScanner
+
+local Query = Page.Query
+local Search = Query.Search
+local Refresh = Query.Refresh
+local Results = Page.Results.Clip.Content
+
+local moduleList = List.new(Results)
+local moduleLogs = {}
+local selectedLog
+
+local pathContext = ContextMenuButton.new("rbxassetid://4891705738", "Get Module Path")
+moduleList:BindContextMenu(ContextMenu.new({ pathContext }))
+
+pathContext:SetCallback(function()
+    local selectedInstance = selectedLog.ModuleScript.Instance
+
+    setClipboard(getInstancePath(selectedInstance))
+    MessageBox.Show("Success", ("%s's path was copied to your clipboard."):format(selectedInstance.Name), MessageType.OK)
+end)
+
+-- Log Object
+
+local Log = {}
+
+function Log.new(moduleScript)
+    local log = {}
+    local moduleInstance = moduleScript.Instance
+    local button = Assets.ModuleLog:Clone()
+    local listButton = ListButton.new(button, moduleList)
+    
+    button.Name = moduleInstance.Name
+    button:FindFirstChild("Name").Text = moduleInstance.Name
+    button.Protos.Text = #moduleScript.Protos
+    button.Constants.Text = #moduleScript.Constants
+
+    listButton:SetRightCallback(function()
+        selectedLog = log
+    end)
+
+    moduleLogs[moduleInstance] = log
+
+    log.ModuleScript = moduleScript
+    log.Button = listButton
+    return log
+end
+
+-- UI Functionality
+
+local function addModules(query)
+    moduleList:Clear()
+    moduleLogs = {}
+
+    for _moduleInstance, moduleScript in pairs(Methods.Scan(query)) do
+        Log.new(moduleScript)
+    end
+
+    moduleList:Recalculate()
+end
+
+Search.FocusLost:Connect(function(returned)
+    if returned then
+        addModules(Search.Text)
+        Search.Text = ""
+    end
+end)
+
+Refresh.MouseButton1Click:Connect(function()
+    addModules()
+end)
+
+addModules()
+
+return ModuleScanner
